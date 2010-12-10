@@ -11,12 +11,12 @@
 # this.  Otherwise you can specify the information inline as done below.
 # See http://xmlns.com/foaf/spec/ for defines fields.
 
-<> a cpack:Package ;
+<> a cpack:Library ;
 	cpack:packageName "statistics" ;
 	dcterms:title "Gather statistical information" ;
 	cpack:author [ a foaf:Person ;
 		       foaf:name "Jan Wielemaker" ;
-		       foaf:mbox "@FOAFMBOX@" ;
+		       foaf:mbox <mailto:J.Wielemaker@cs.vu.nl> ;
 		     ] ;
 	cpack:primaryRepository
 	    [ a cpack:GitRepository ;
@@ -24,7 +24,8 @@
 	    ] ;
 	cpack:description
 
-"""The package description goes here.  You can use PlDoc Wiki markup.
+"""This package is intended to collect libraries compute statistics
+   over various datasets.  It is currently almost empty.
 """ .
 
 
