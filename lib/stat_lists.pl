@@ -30,7 +30,8 @@
 
 :- module(stat_lists,
 	  [ list_mean/2,		% +List, -Mean
-	    list_variance/2		% +List, -Variance
+	    list_variance/2,		% +List, -Variance
+	    list_standard_deviation/2	% +List, -StDev
 	  ]).
 :- use_module(library(lists)).
 :- use_module(library(error)).
@@ -49,6 +50,9 @@ This library computes statistical properties of lists of numbers.
 %	@error domain_error(non_empty_list, List) if List is [].
 
 list_mean(List, Mean) :-
+	list_length_mean(List, _Len, Mean).
+
+list_length_mean(List, Len, Mean) :-
 	length(List, Len),
 	(   Len == 0
 	->  domain_error(non_empty_list, List)
@@ -70,3 +74,14 @@ variance([], _, V, V).
 variance([H|T], Mean, V0, V) :-
 	V1 is V0+(H-Mean)**2,
 	variance(T, Mean, V1, V).
+
+%%	list_standard_deviation(+List, -StDev:float) is det.
+%
+%	True if StDev is the standard deviation of List.
+%
+%	@error domain_error(non_empty_list, List) if List is [].
+
+list_standard_deviation(List, StDev) :-
+	list_length_mean(List, Len, Mean),
+	variance(List, Mean, 0, Variance),
+	StDev is sqrt(Variance/Len).
