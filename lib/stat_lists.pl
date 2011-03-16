@@ -31,7 +31,8 @@
 :- module(stat_lists,
 	  [ list_mean/2,		% +List, -Mean
 	    list_variance/2,		% +List, -Variance
-	    list_standard_deviation/2	% +List, -StDev
+	    list_sample_standard_deviation/2, % +List, -StDev
+	    list_population_standard_deviation/2 % +List, -StDev
 	  ]).
 :- use_module(library(lists)).
 :- use_module(library(error)).
@@ -75,13 +76,34 @@ variance([H|T], Mean, V0, V) :-
 	V1 is V0+(H-Mean)**2,
 	variance(T, Mean, V1, V).
 
-%%	list_standard_deviation(+List, -StDev:float) is det.
+%%	list_population_standard_deviation(+List, -StDev:float) is det.
 %
-%	True if StDev is the standard deviation of List.
+%	True if StDev is the _population_ standard deviation of List.
+%	List must be non-empty.
 %
 %	@error domain_error(non_empty_list, List) if List is [].
+%	@see list_sample_standard_deviation/2.
 
-list_standard_deviation(List, StDev) :-
+list_population_standard_deviation(List, StDev) :-
 	list_length_mean(List, Len, Mean),
 	variance(List, Mean, 0, Variance),
 	StDev is sqrt(Variance/Len).
+
+%%	list_sample_standard_deviation(+List, -StDev:float) is det.
+%
+%	True if StDev is the _sample_ standard deviation of List. List
+%	must hold at least two elements.
+%
+%	@error domain_error(non_empty_list, List) if List is [].
+%	@error domain_error(two_or_more_element_list, List) if List is [_].
+%	@see list_population_standard_deviation/2.
+
+list_sample_standard_deviation(List, StDev) :-
+	list_length_mean(List, Len, Mean),
+	(   Len == 1
+	->  domain_error(two_or_more_element_list, List)
+	;   true
+	),
+	variance(List, Mean, 0, Variance),
+	StDev is sqrt(Variance/(Len-1)).
+
