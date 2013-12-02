@@ -29,10 +29,11 @@
 */
 
 :- module(stat_lists,
-	  [ list_mean/2,		% +List, -Mean
-	    list_variance/2,		% +List, -Variance
-	    list_sample_standard_deviation/2, % +List, -StDev
-	    list_population_standard_deviation/2 % +List, -StDev
+	  [ list_mean/2,			  % +List, -Mean
+	    list_variance/2,			  % +List, -Variance
+	    list_sample_standard_deviation/2,	  % +List, -StDev
+	    list_population_standard_deviation/2, % +List, -StDev
+	    list_five_number_summary/2		  % +List, -FiveNumberSummary
 	  ]).
 :- use_module(library(lists)).
 :- use_module(library(error)).
@@ -106,4 +107,50 @@ list_sample_standard_deviation(List, StDev) :-
 	),
 	variance(List, Mean, 0, Variance),
 	StDev is sqrt(Variance/(Len-1)).
+
+%%	list_median_(+SortedList, +Length, -Median, -Middle) is det.
+%
+%	Computes the median of the prefix with Length of SortedList.
+
+list_median_(SortedList, Length, Median, Middle) :-
+	Middle is Length div 2,
+	nth0(Middle, SortedList, MiddleValue),
+	Odd    is Length rem 2,
+	(   Odd == 1
+	->  Median = MiddleValue
+	;   Middle0 is Middle - 1,
+	    nth0(Middle0, SortedList, Middle0Value),
+	    Median is (Middle0Value + MiddleValue) /2
+	).
+
+
+%%	list_five_number_summary(SortedList, Summary) is det.
+%
+%	If SortedList is sorted and has length > 1, Summary contains its
+%	Tukey's five number summary:
+%
+%	    ==
+%	    FiveNumSummary = [ min(Minimum),
+%			       q1(Q1),
+%			       median(Median),
+%			       q3(Q3),
+%			       max(Maximum)
+%			     ]
+%	    ==
+%
+%	@see also: http://en.wikipedia.org/wiki/Five-number_summary
+
+list_five_number_summary(SortedList, FiveNumSummary) :-
+	FiveNumSummary = [min(Minimum), q1(Q1), median(Median), q3(Q3), max(Maximum)],
+	length(SortedList, Length),
+	list_median_(SortedList, Length, Median, Middle),
+	length(LastHalf, Middle),
+	append(_, LastHalf, SortedList),!,
+	list_median_(SortedList, Middle, Q1, _),
+	list_median_(LastHalf,   Middle, Q3, _),
+	nth0(0, SortedList, Minimum),
+	nth1(Length, SortedList, Maximum).
+
+
+
 
