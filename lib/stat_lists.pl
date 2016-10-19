@@ -112,10 +112,10 @@ list_sample_standard_deviation(List, StDev) :-
 %
 %	Computes the median of the prefix with Length of SortedList.
 
-list_median_(SortedList, Length, Median, Middle) :-
-	Middle is Length div 2,
+list_median_(SortedList, Start, Length, Median, Middle, Odd) :-
+	Middle is (Start + Length) div 2,
+	Odd    is (Start + Length) rem 2,
 	nth0(Middle, SortedList, MiddleValue),
-	Odd    is Length rem 2,
 	(   Odd == 1
 	->  Median = MiddleValue
 	;   Middle0 is Middle - 1,
@@ -143,13 +143,12 @@ list_median_(SortedList, Length, Median, Middle) :-
 list_five_number_summary(SortedList, FiveNumSummary) :-
 	FiveNumSummary = [min(Minimum), q1(Q1), median(Median), q3(Q3), max(Maximum)],
 	length(SortedList, Length),
-	list_median_(SortedList, Length, Median, Middle),
-	length(LastHalf, Middle),
-	append(_, LastHalf, SortedList),!,
-	list_median_(SortedList, Middle, Q1, _),
-	list_median_(LastHalf,   Middle, Q3, _),
-	nth0(0, SortedList, Minimum),
-	nth1(Length, SortedList, Maximum).
+	debug(stat_list, 'Computing 5 num summary for sorted list of length ~w', [Length]),	nth0(0, SortedList, Minimum),
+	nth1(Length, SortedList, Maximum),
+	list_median_(SortedList, 0, Length, Median, Middle, Odd),
+	list_median_(SortedList, 0, Middle+Odd, Q1, _, _),
+	list_median_(SortedList, Middle, Length,Q3, _, _),
+	debug(stat_list, 'Computed 5 num summary for sorted list of length ~w', [Length]).
 
 
 
